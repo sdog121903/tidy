@@ -1,36 +1,32 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# TIDY 🧹
 
-## Getting Started
+A tiny shared chore checklist for Admin, Laura, Anna and Noemie. No accounts: type your name on the first screen and the device remembers you.
 
-First, run the development server:
+- **Weeks run Monday → Sunday (Europe/Madrid).** Every chore is on Laura's, Anna's and Noemie's own list. After Sunday 23:59 all checkmarks are wiped for everyone (history is kept for reports and "last cleaned").
+- **Tabs:** *My chores* (your own checklist) · *Everyone* (table: chores × people) · *Reports* (per week: who did what, what's left / missed).
+- **Admin** (type `admin`): sees the table and each person's list, can tick any cell, comment to a person on a chore, and in *Manage* add / edit / reorder / deactivate / delete chores, set emails, wipe the week early, or send the report now.
+- **Emails** (via a free Gmail account): when someone checks off a chore, everyone else gets an email. Every Sunday night a weekly report goes to everyone (Vercel Cron → `/api/cron/weekly-report`, see `vercel.json`).
+- Pages refresh every 5 seconds so everyone sees updates.
+## Stack
+
+Next.js 16 · Postgres (Neon via Vercel Marketplace) · `postgres` driver · Tailwind. Tables are created automatically on first request (`src/lib/db.ts`).
+
+## Env vars
+
+| Name | Purpose |
+| --- | --- |
+| `DATABASE_URL` | Postgres connection string (set by the Neon integration) |
+| `GMAIL_USER` | Gmail address the app sends from |
+| `GMAIL_APP_PASSWORD` | Google app password for that account (myaccount.google.com/apppasswords). Without these, emails are skipped. |
+| `CRON_SECRET` | Protects the weekly-report cron endpoint |
+| `APP_TIMEZONE` | Optional, defaults to `Europe/Madrid` |
+
+## Local dev
 
 ```bash
+docker run -d --name tidy-pg -e POSTGRES_PASSWORD=tidy -e POSTGRES_DB=tidy -p 54329:5432 postgres:17-alpine
+echo 'DATABASE_URL=postgres://postgres:tidy@localhost:54329/tidy' >> .env.local
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Date style (DD/MM/YYYY vs MM/DD/YYYY) is set in `src/lib/relative-day.ts`.

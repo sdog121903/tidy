@@ -1,69 +1,103 @@
-import Image from "next/image";
+import { setChoreDone } from "@/app/actions";
+import { AutoRefresh } from "@/components/auto-refresh";
+import { ChoreComments } from "@/components/chore-comments";
+import { EveryoneTable } from "@/components/everyone-table";
+import { ManageView } from "@/components/manage-view";
+import { NameForm } from "@/components/name-form";
+import { NavMenu } from "@/components/nav-menu";
+import { ReportsView } from "@/components/reports-view";
+import { Footer, Shell } from "@/components/shell";
+import { TidyChecklist } from "@/components/tidy-checklist";
+import { When } from "@/components/when";
+import { getCurrentUser } from "@/lib/current-user";
+import { loadBoard, loadReports, recentWeeks } from "@/lib/data";
+import { CLEANERS, findCleaner } from "@/lib/users";
+import { weekOf } from "@/lib/week";
 
-export default function Home() {
-  return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+export default async function Home({ searchParams }: PageProps<"/">) {
+  const me = await getCurrentUser();
+
+  if (!me) {
+    return (
+      <main className="t-login">
+        <div className="t-login-circle">
+          <h1 className="t-login-title">tidy</h1>
+          <p className="t-login-sub">Our weekly chore checklist</p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
+        <NameForm />
       </main>
-    </div>
+    );
+  }
+
+  const isAdmin = me.id === "admin";
+  const tabs = isAdmin
+    ? [
+        { id: "everyone", label: "Everyone" },
+        ...CLEANERS.map((p) => ({ id: p.id, label: p.name })),
+        { id: "reports", label: "Reports" },
+        { id: "manage", label: "Manage" },
+      ]
+    : [
+        { id: me.id, label: "My chores" },
+        { id: "everyone", label: "Everyone" },
+        { id: "reports", label: "Reports" },
+      ];
+  const requested = (await searchParams).tab;
+  const tab = tabs.find((t) => t.id === requested)?.id ?? tabs[0].id;
+  const nav = tabs.map((t) => ({ href: `/?tab=${t.id}`, label: t.label, current: t.id === tab }));
+
+  const week = weekOf();
+  const { chores, emails } = await loadBoard(week);
+  const active = chores.filter((c) => c.active);
+  const person = findCleaner(tab);
+
+  // A person's list (your own, or any of them for the admin) is the full-screen checklist.
+  if (person) {
+    return (
+      <>
+        <AutoRefresh />
+        <TidyChecklist
+          items={active.map((c) => {
+            const doneAt = c.done[person.id];
+            const lastAt = c.lastBy[person.id];
+            const comments = c.comments.filter((m) => m.person === person.id);
+            return {
+              id: c.id,
+              label: c.title,
+              checked: !!doneAt,
+              caption: doneAt ? (
+                <>
+                  Done · <When iso={doneAt} />
+                </>
+              ) : lastAt ? (
+                <>
+                  Last cleaned by {person.name} · <When iso={lastAt} />
+                </>
+              ) : (
+                "Not cleaned yet"
+              ),
+              comments: <ChoreComments choreId={c.id} comments={comments} person={person} me={me} />,
+              commentCount: comments.length,
+              commentLabel: isAdmin ? `Comment to ${person.name}` : "Comments",
+            };
+          })}
+          onToggle={setChoreDone.bind(null, person.id)}
+          autoCheckOnScroll={false}
+          menu={<NavMenu items={nav} />}
+        />
+        <Footer />
+      </>
+    );
+  }
+
+  return (
+    <>
+      <AutoRefresh />
+      <Shell me={me} week={week} nav={nav}>
+        {tab === "everyone" && <EveryoneTable chores={active} me={me} />}
+        {tab === "reports" && <ReportsView reports={await loadReports(await recentWeeks(8))} currentWeek={week} />}
+        {tab === "manage" && <ManageView chores={chores} emails={emails} />}
+      </Shell>
+    </>
   );
 }

@@ -1,0 +1,60 @@
+import type { WeekReport } from "@/lib/data";
+import { userName } from "@/lib/users";
+import { weekLabel } from "@/lib/week";
+
+export function ReportsView({ reports, currentWeek }: { reports: WeekReport[]; currentWeek: string }) {
+  if (reports.length === 0) return <p className="t-empty">No reports yet. They start once there are chores.</p>;
+
+  return (
+    <>
+      {reports.map((r) => {
+        const current = r.week === currentWeek;
+        return (
+          <section key={r.week} className="t-rp" aria-labelledby={`wk-${r.week}`}>
+            <div className="t-rp-head">
+              <h2 id={`wk-${r.week}`}>{weekLabel(r.week)}</h2>
+              <span>{current ? "This week · so far" : "Final"}</span>
+            </div>
+            <div className="t-rp-grid">
+              {r.people.map((p) => (
+                <article key={p.person} className="t-rp-card">
+                  <header>
+                    <h3>{userName(p.person)}</h3>
+                    <span>
+                      {p.done.length}/{r.total}
+                    </span>
+                  </header>
+                  <div
+                    className="t-bar"
+                    role="progressbar"
+                    aria-valuemin={0}
+                    aria-valuemax={r.total}
+                    aria-valuenow={p.done.length}
+                    aria-label={`${userName(p.person)} progress`}
+                  >
+                    <span style={{ width: `${r.total ? (p.done.length / r.total) * 100 : 0}%` }} />
+                  </div>
+                  {p.items.length > 0 && (
+                    <ul className="t-rp-list">
+                      {p.items.map((it, i) => (
+                        <li key={i} data-done={it.done}>
+                          {it.title}
+                          <span className="t-sr">{it.done ? " (done)" : current ? " (to do)" : " (missed)"}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                  <p className="t-rp-foot">
+                    {p.missed.length === 0
+                      ? "All done"
+                      : `${p.missed.length} ${current ? "left to do" : "missed"}`}
+                  </p>
+                </article>
+              ))}
+            </div>
+          </section>
+        );
+      })}
+    </>
+  );
+}
