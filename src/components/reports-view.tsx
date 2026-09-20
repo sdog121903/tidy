@@ -1,9 +1,22 @@
 import type { WeekReport } from "@/lib/data";
+import { Icon } from "./icons";
+import { messages, type Lang } from "@/lib/i18n";
 import { userName } from "@/lib/users";
 import { weekLabel } from "@/lib/week";
 
-export function ReportsView({ reports, currentWeek }: { reports: WeekReport[]; currentWeek: string }) {
-  if (reports.length === 0) return <p className="t-empty">No reports yet. They start once there are chores.</p>;
+export function ReportsView({
+  reports,
+  currentWeek,
+  lang,
+  isAdmin = false,
+}: {
+  reports: WeekReport[];
+  currentWeek: string;
+  lang: Lang;
+  isAdmin?: boolean;
+}) {
+  const t = messages(lang);
+  if (reports.length === 0) return <p className="t-empty">{t.noReportsYet}</p>;
 
   return (
     <>
@@ -12,8 +25,16 @@ export function ReportsView({ reports, currentWeek }: { reports: WeekReport[]; c
         return (
           <section key={r.week} className="t-rp" aria-labelledby={`wk-${r.week}`}>
             <div className="t-rp-head">
-              <h2 id={`wk-${r.week}`}>{weekLabel(r.week)}</h2>
-              <span>{current ? "This week · so far" : "Final"}</span>
+              <h2 id={`wk-${r.week}`}>{weekLabel(r.week, lang)}</h2>
+              <div className="t-rp-actions">
+                <span>{current ? t.thisWeekSoFar : t.final}</span>
+                {isAdmin && (
+                  <a className="t-pill t-pill--sm" href={`/api/reports/weekly/pdf?week=${r.week}`}>
+                    <Icon name="printer" />
+                    {t.printPdf}
+                  </a>
+                )}
+              </div>
             </div>
             <div className="t-rp-grid">
               {r.people.map((p) => (
@@ -30,7 +51,7 @@ export function ReportsView({ reports, currentWeek }: { reports: WeekReport[]; c
                     aria-valuemin={0}
                     aria-valuemax={r.total}
                     aria-valuenow={p.done.length}
-                    aria-label={`${userName(p.person)} progress`}
+                    aria-label={t.progressOf(userName(p.person))}
                   >
                     <span style={{ width: `${r.total ? (p.done.length / r.total) * 100 : 0}%` }} />
                   </div>
@@ -39,15 +60,18 @@ export function ReportsView({ reports, currentWeek }: { reports: WeekReport[]; c
                       {p.items.map((it, i) => (
                         <li key={i} data-done={it.done}>
                           {it.title}
-                          <span className="t-sr">{it.done ? " (done)" : current ? " (to do)" : " (missed)"}</span>
+                          <span className="t-sr">{" "}
+                            {it.done ? t.itemDone : current ? t.itemToDo : t.itemMissed}</span>
                         </li>
                       ))}
                     </ul>
                   )}
                   <p className="t-rp-foot">
                     {p.missed.length === 0
-                      ? "All done"
-                      : `${p.missed.length} ${current ? "left to do" : "missed"}`}
+                      ? t.everythingDone
+                      : current
+                        ? t.leftToDo(p.missed.length)
+                        : t.missedCount(p.missed.length)}
                   </p>
                 </article>
               ))}

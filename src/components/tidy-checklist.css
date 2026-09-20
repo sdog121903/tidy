@@ -314,19 +314,27 @@
   color: var(--tidy-accent);
 }
 
+/* Collapsed to nothing until the week is finished, so the footer sits just under the list. */
 .tidy-done {
-  height: calc(var(--tidy-vh) * 0.9);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: grid;
+  grid-template-rows: 0fr;
+  justify-items: center;
   text-align: center;
+  padding: 0 16px;
   opacity: 0;
-  transition: opacity 0.6s;
+  transition:
+    grid-template-rows 0.6s,
+    padding 0.6s,
+    opacity 0.6s;
 }
 .tidy-done[data-show="true"] {
+  grid-template-rows: 1fr;
+  padding: 48px 16px 8px;
   opacity: 1;
 }
 .tidy-done p {
+  min-height: 0;
+  overflow: hidden;
   font-size: calc(var(--tidy-title) * 0.8);
   font-weight: 800;
   letter-spacing: -0.05em;
@@ -456,6 +464,10 @@
       animation-timing-function: linear(0, 0.028, 0.104, 0.216, 0.352, 0.5, 0.648, 0.784, 0.896, 0.972, 1);
       animation-timeline: view();
       animation-range: cover calc(var(--tidy-row) / 2) cover calc(var(--tidy-row) / 2 + var(--tidy-vh) * 0.34);
+    }
+    /* the page stops right under the last row, so it has less scroll to rise in */
+    .tidy-row:last-child {
+      animation-range: cover calc(var(--tidy-row) / 2) cover calc(var(--tidy-row) / 2 + var(--tidy-vh) * 0.16);
     }
   }
 }

@@ -2,17 +2,26 @@
 
 import { useState } from "react";
 import { deleteChore, moveChore, resetThisWeek, setActive, updateChore } from "@/app/actions";
+import { messages, type Lang } from "@/lib/i18n";
+import { ChoreTranslations } from "./chore-translations";
 import { Icon } from "./icons";
 import { SubmitButton } from "./submit-button";
 
-type Chore = { id: number; title: string; notes: string; active: boolean };
+type Chore = {
+  id: number;
+  title: string;
+  titles: { main: string; en: string; fr: string; es: string };
+  notes: string;
+  active: boolean;
+};
 
 /** Chore list as an accordion: one chore open at a time. */
-export function ManageChores({ chores }: { chores: Chore[] }) {
+export function ManageChores({ chores, lang }: { chores: Chore[]; lang: Lang }) {
+  const t = messages(lang);
   const [open, setOpen] = useState<number | null>(null);
   const [confirming, setConfirming] = useState<number | null>(null);
 
-  if (chores.length === 0) return <p className="t-confirm">None yet.</p>;
+  if (chores.length === 0) return <p className="t-confirm">{t.noneYet}</p>;
 
   return (
     <ul className="t-chores">
@@ -33,10 +42,10 @@ export function ManageChores({ chores }: { chores: Chore[] }) {
             >
               <span>
                 {c.title}
-                {!c.active && <small>deactivated</small>}
+                {!c.active && <small>{t.deactivated}</small>}
               </span>
               <span className="t-edit">
-                Edit
+                {t.edit}
                 <Icon name="sliders" />
               </span>
             </button>
@@ -46,22 +55,23 @@ export function ManageChores({ chores }: { chores: Chore[] }) {
                 <form action={updateChore}>
                   {hidden}
                   <label htmlFor={`chore-name-${c.id}`} className="t-sr">
-                    Chore name
+                    {t.choreName}
                   </label>
-                  <input id={`chore-name-${c.id}`} name="title" required maxLength={200} defaultValue={c.title} className="t-input" />
+                  <input id={`chore-name-${c.id}`} name="title" required maxLength={200} defaultValue={c.titles.main} className="t-input" />
                   <label htmlFor={`chore-notes-${c.id}`} className="t-sr">
-                    Notes
+                    {t.notes}
                   </label>
                   <input
                     id={`chore-notes-${c.id}`}
                     name="notes"
                     maxLength={1000}
                     defaultValue={c.notes}
-                    placeholder="Notes (optional)"
+                    placeholder={t.notesPlaceholder}
                     className="t-input"
                   />
+                  <ChoreTranslations idPrefix={`chore-title-${c.id}`} lang={lang} values={c.titles} />
                   <div className="t-row">
-                    <SubmitButton className="t-pill">Save changes</SubmitButton>
+                    <SubmitButton className="t-pill">{t.saveChanges}</SubmitButton>
                   </div>
                 </form>
 
@@ -71,7 +81,7 @@ export function ManageChores({ chores }: { chores: Chore[] }) {
                     <input type="hidden" name="dir" value="up" />
                     <SubmitButton className="t-pill" disabled={i === 0}>
                       <Icon name="arrowUp" />
-                      Up
+                      {t.up}
                     </SubmitButton>
                   </form>
                   <form action={moveChore}>
@@ -79,7 +89,7 @@ export function ManageChores({ chores }: { chores: Chore[] }) {
                     <input type="hidden" name="dir" value="down" />
                     <SubmitButton className="t-pill" disabled={i === chores.length - 1}>
                       <Icon name="arrowDown" />
-                      Down
+                      {t.down}
                     </SubmitButton>
                   </form>
                   <form action={setActive}>
@@ -87,7 +97,7 @@ export function ManageChores({ chores }: { chores: Chore[] }) {
                     <input type="hidden" name="active" value={String(!c.active)} />
                     <SubmitButton className="t-pill">
                       <Icon name={c.active ? "pause" : "play"} />
-                      {c.active ? "Deactivate" : "Activate"}
+                      {c.active ? t.deactivate : t.activate}
                     </SubmitButton>
                   </form>
                 </div>
@@ -100,14 +110,14 @@ export function ManageChores({ chores }: { chores: Chore[] }) {
                     onClick={() => setConfirming(confirming === c.id ? null : c.id)}
                   >
                     <Icon name="trash" />
-                    Delete chore…
+                    {t.deleteChore}
                   </button>
                 </div>
                 {confirming === c.id && (
                   <form action={deleteChore} className="t-row">
                     {hidden}
-                    <p className="t-confirm">This removes it and all its history.</p>
-                    <SubmitButton className="t-pill t-pill--ink">Yes, delete</SubmitButton>
+                    <p className="t-confirm">{t.deleteChoreConfirm}</p>
+                    <SubmitButton className="t-pill t-pill--ink">{t.yesDelete}</SubmitButton>
                   </form>
                 )}
               </div>
@@ -120,20 +130,19 @@ export function ManageChores({ chores }: { chores: Chore[] }) {
 }
 
 /** Dashed danger card with a confirmation step. */
-export function WipeWeek() {
+export function WipeWeek({ lang }: { lang: Lang }) {
+  const t = messages(lang);
   const [open, setOpen] = useState(false);
   return (
     <div className="t-danger">
       <button type="button" className="t-danger-toggle" aria-expanded={open} onClick={() => setOpen(!open)}>
         <Icon name="refresh" />
-        Wipe this week&apos;s checkmarks early…
+        {t.wipeWeek}
       </button>
       {open && (
         <form action={resetThisWeek} className="t-danger-body">
-          <p className="t-confirm">
-            Unchecks everything for everyone right now. (This happens automatically every Sunday at 23:59.)
-          </p>
-          <SubmitButton className="t-pill t-pill--ink">Yes, wipe</SubmitButton>
+          <p className="t-confirm">{t.wipeWeekConfirm}</p>
+          <SubmitButton className="t-pill t-pill--ink">{t.yesWipe}</SubmitButton>
         </form>
       )}
     </div>

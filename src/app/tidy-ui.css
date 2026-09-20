@@ -111,10 +111,18 @@
 
 html {
   background: var(--t-accent);
+  /* no rubber-band overscroll, so the page ground never peeks past the screen */
+  overscroll-behavior: none;
+}
+/* the checklist and the login start on black, so the ground behind them matches */
+html:has(.tidy),
+html:has(.t-login) {
+  background: var(--t-ink);
 }
 body {
   margin: 0;
-  background: var(--t-accent);
+  overscroll-behavior: none;
+  background: transparent;
   color: var(--t-ink);
   font-family: var(--font-bricolage), system-ui, -apple-system, sans-serif;
   font-optical-sizing: auto;
@@ -593,6 +601,11 @@ span.t-ring-check {
   font-weight: 500;
   color: var(--t-muted);
 }
+.t-rp-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
 .t-rp-grid {
   margin-top: 16px;
   display: grid;
@@ -1055,4 +1068,101 @@ span.t-ring-check {
   .t-nav-links a {
     transition: none;
   }
+}
+
+/* ---------- settings ---------- */
+
+.t-settings {
+  margin-top: 24px;
+  border: 2px solid var(--t-ink);
+  border-radius: 28px;
+  padding: var(--t-mg-pad);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.t-settings-title {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+.t-settings-hint {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1.4;
+  color: var(--t-muted);
+}
+.t-lang-options {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 10px;
+}
+@media (min-width: 768px) {
+  .t-lang-options {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+.t-lang-option {
+  min-height: 64px;
+  padding: 0 22px;
+  border: 2px solid var(--t-ink);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--t-ink);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font: inherit;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.t-lang-code {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  opacity: 0.6;
+}
+.t-lang-option[aria-pressed="true"] {
+  background: var(--t-ink);
+  color: var(--t-accent);
+}
+.t-lang-option[aria-pressed="true"] .t-lang-code {
+  opacity: 1;
+}
+
+/* ---------- chore-name translations (Manage) ---------- */
+
+.t-translations > summary {
+  list-style: none;
+  width: fit-content;
+}
+.t-translations > summary::-webkit-details-marker {
+  display: none;
+}
+.t-translations[open] > summary {
+  background: var(--t-ink);
+  color: var(--t-accent);
+}
+.t-add .t-translations[open] > summary {
+  background: var(--t-accent);
+  color: var(--t-ink);
+}
+.t-translations-body {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.t-translations-hint {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.35;
+  opacity: 0.85;
 }

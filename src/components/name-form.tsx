@@ -2,15 +2,17 @@
 
 import { useActionState } from "react";
 import { enterName } from "@/app/actions";
+import { messages, type Lang } from "@/lib/i18n";
 
-export function NameForm() {
+export function NameForm({ lang }: { lang: Lang }) {
+  const t = messages(lang);
   const [error, action, pending] = useActionState(enterName, null);
   return (
     <form action={action} className="t-login-form">
-      <label htmlFor="name">What&apos;s your name?</label>
-      <input id="name" name="name" type="text" autoFocus autoComplete="given-name" placeholder="Type your name" />
+      <label htmlFor="name">{t.whatsYourName}</label>
+      <input id="name" name="name" type="text" autoFocus autoComplete="given-name" placeholder={t.typeYourName} />
       <button disabled={pending} data-pending={pending || undefined}>
-        Let&apos;s go
+        {t.letsGo}
       </button>
       {error && (
         <p role="alert" className="t-login-error">

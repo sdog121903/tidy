@@ -2,10 +2,10 @@
 
 import { cookies } from "next/headers";
 import { refresh } from "next/cache";
-import { after } from "next/server";
 import { db } from "@/lib/db";
-import { getCurrentUser } from "@/lib/current-user";
-import { sendChoreDoneEmails, sendWeeklyReport } from "@/lib/email";
+import { getCurrentUser, getLang } from "@/lib/current-user";
+import { LANG_COOKIE, isLang, messages } from "@/lib/i18n";
+import { sendWeeklyReport } from "@/lib/email";
 import { USERS, USER_COOKIE, findCleaner, matchName } from "@/lib/users";
 import { weekOf } from "@/lib/week";
 
@@ -36,7 +36,7 @@ async function requirePersonFrom(fd: FormData) {
 
 export async function enterName(_prev: string | null, fd: FormData): Promise<string | null> {
   const user = matchName(str(fd, "name"));
-  if (!user) return "Hmm, I don't know that name. Try Laura, Anna or Noemie.";
+  if (!user) return messages(await getLang()).unknownName;
   (await cookies()).set(USER_COOKIE, user.id, {
     path: "/",
     httpOnly: true,
@@ -44,6 +44,19 @@ export async function enterName(_prev: string | null, fd: FormData): Promise<str
     maxAge: 60 * 60 * 24 * 365,
   });
   return null;
+}
+
+/** Saves this device's UI language (Settings). Anyone can change it, even before entering a name. */
+export async function setLanguage(fd: FormData) {
+  const lang = str(fd, "lang");
+  if (!isLang(lang)) return;
+  (await cookies()).set(LANG_COOKIE, lang, {
+    path: "/",
+    httpOnly: true,
+    sameSite: "lax",
+    maxAge: 60 * 60 * 24 * 365,
+  });
+  refresh();
 }
 
 export async function leave() {
@@ -59,12 +72,10 @@ async function setDone(person: string, choreId: number, done: boolean) {
     await sql`delete from completions where chore_id = ${choreId} and person = ${person} and week = ${week}`;
     return;
   }
-  const [row] = await sql<{ title: string }[]>`
+  await sql`
     insert into completions (chore_id, person, week)
     select id, ${person}, ${week} from chores where id = ${choreId} and active
-    on conflict do nothing
-    returning (select title from chores where id = ${choreId}) as title`;
-  if (row) after(() => sendChoreDoneEmails(person, row.title));
+    on conflict do nothing`;
 }
 
 /** Checks or unchecks one chore for one person, for the current week. */
@@ -107,13 +118,23 @@ export async function deleteComment(fd: FormData) {
 
 // ---------- admin ----------
 
+/** Optional per-language chore names from the add/edit forms. */
+function translations(fd: FormData) {
+  return {
+    en: str(fd, "title_en").slice(0, 200),
+    fr: str(fd, "title_fr").slice(0, 200),
+    es: str(fd, "title_es").slice(0, 200),
+  };
+}
+
 export async function addChore(fd: FormData) {
   await requireAdmin();
   const title = str(fd, "title").slice(0, 200);
   if (!title) return;
   const sql = await db();
-  await sql`insert into chores (title, notes, position)
-    values (${title}, ${str(fd, "notes").slice(0, 1000)},
+  const tr = translations(fd);
+  await sql`insert into chores (title, title_en, title_fr, title_es, notes, position)
+    values (${title}, ${tr.en}, ${tr.fr}, ${tr.es}, ${str(fd, "notes").slice(0, 1000)},
       (select coalesce(max(position), 0) + 1 from chores))`;
   refresh();
 }
@@ -123,7 +144,9 @@ export async function updateChore(fd: FormData) {
   const title = str(fd, "title").slice(0, 200);
   if (!title) return;
   const sql = await db();
-  await sql`update chores set title = ${title}, notes = ${str(fd, "notes").slice(0, 1000)}
+  const tr = translations(fd);
+  await sql`update chores set title = ${title}, title_en = ${tr.en}, title_fr = ${tr.fr}, title_es = ${tr.es},
+    notes = ${str(fd, "notes").slice(0, 1000)}
     where id = ${num(fd, "choreId")}`;
   refresh();
 }
@@ -168,7 +191,7 @@ export async function resetThisWeek() {
 
 export async function sendReportNow() {
   await requireAdmin();
-  await sendWeeklyReport(weekOf());
+  await sendWeeklyReport(weekOf(), await getLang());
 }
 
 export async function saveEmails(fd: FormData) {

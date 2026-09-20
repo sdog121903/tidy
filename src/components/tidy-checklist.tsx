@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, useTransition } from "react";
+import { DEFAULT_LANG, messages, type Lang } from "@/lib/i18n";
 import { Icon } from "./icons";
 import "./tidy-checklist.css";
 
@@ -33,13 +34,15 @@ type Props = {
   autoCheckOnScroll?: boolean;
   /** Rendered at the right of the fixed top bar, before the counter (e.g. the menu button). */
   menu?: React.ReactNode;
+  lang?: Lang;
 };
 
 /**
  * The "tidy" checklist screen: a yellow circle grows to fill the screen, then the chores
  * rise in one by one as big round buttons.
  */
-export function TidyChecklist({ items, onToggle, autoCheckOnScroll = true, menu }: Props) {
+export function TidyChecklist({ items, onToggle, autoCheckOnScroll = true, menu, lang = DEFAULT_LANG }: Props) {
+  const t = messages(lang);
   const [manual, setManual] = useState<Record<number, boolean>>({});
   const [thread, setThread] = useState<number | null>(null);
   const [auto, setAuto] = useState<boolean[]>([]);
@@ -119,12 +122,14 @@ export function TidyChecklist({ items, onToggle, autoCheckOnScroll = true, menu 
       // Phase B: rows rise in as their centre enters the bottom third.
       const contentTop = content.getBoundingClientRect().top;
       const autoNow: boolean[] = [];
+      const last = rowRefs.current.length - 1;
       rowRefs.current.forEach((li, i) => {
         if (!li) return;
         const yc = contentTop + rowCenters[i];
         autoNow.push(yc < CHECK_AT * H);
         if (cssDriven || reduced) return;
-        const r = smooth(clamp01((H - yc) / (0.34 * H)));
+        // The page stops right under the last row, so it has less scroll to rise in.
+        const r = smooth(clamp01((H - yc) / ((i === last ? 0.16 : 0.34) * H)));
         li.style.opacity = r.toFixed(3);
         li.style.transform = `translate3d(0, ${((1 - r) * H * 0.1).toFixed(1)}px, 0) scale(${(0.82 + 0.18 * r).toFixed(3)})`;
       });
@@ -188,7 +193,7 @@ export function TidyChecklist({ items, onToggle, autoCheckOnScroll = true, menu 
   return (
     <div
       ref={rootRef}
-      lang="es"
+      lang={lang}
       className="tidy"
       onPointerMove={moveCursor}
       onPointerLeave={() => cursorRef.current && (cursorRef.current.dataset.in = "false")}
@@ -200,7 +205,7 @@ export function TidyChecklist({ items, onToggle, autoCheckOnScroll = true, menu 
       <div ref={contentRef} className="tidy-content">
         <section className="tidy-hero">
           <h1 className="tidy-title">tidy</h1>
-          <p className="tidy-subtitle">terminemos nuestros quehaceres</p>
+          <p className="tidy-subtitle">{t.heroSubtitle}</p>
         </section>
 
         <ol className="tidy-list">
@@ -239,7 +244,7 @@ export function TidyChecklist({ items, onToggle, autoCheckOnScroll = true, menu 
                     <button
                       type="button"
                       className="tidy-comment-btn"
-                      aria-label={`${r.commentLabel ?? "Comments"}${r.commentCount ? ` (${r.commentCount})` : ""}`}
+                      aria-label={`${r.commentLabel ?? t.comments}${r.commentCount ? ` (${r.commentCount})` : ""}`}
                       aria-expanded={thread === r.id}
                       aria-controls={`thread-${r.id}`}
                       onClick={() => setThread(thread === r.id ? null : r.id)}
@@ -262,7 +267,7 @@ export function TidyChecklist({ items, onToggle, autoCheckOnScroll = true, menu 
         </ol>
 
         <div className="tidy-done" data-show={total > 0 && count === total}>
-          <p>¡todo hecho!</p>
+          <p>{t.allDone}</p>
         </div>
       </div>
 
@@ -270,7 +275,7 @@ export function TidyChecklist({ items, onToggle, autoCheckOnScroll = true, menu 
         <span className="tidy-wordmark">tidy</span>
         <div className="tidy-bar-right">
           {menu}
-          <div className="tidy-counter" role="status" aria-label={`${count} de ${total} quehaceres hechos`}>
+          <div className="tidy-counter" role="status" aria-label={t.counterLabel(count, total)}>
             {count}/{total}
           </div>
         </div>

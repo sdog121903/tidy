@@ -1,13 +1,24 @@
 import "server-only";
 import { db } from "./db";
+import { DEFAULT_LANG, type Lang } from "./i18n";
 import { CLEANERS } from "./users";
 import { addWeeks, weekOf } from "./week";
+
+type TitledRow = { title: string; title_en: string; title_fr: string; title_es: string };
+
+/** The chore's name in the given language, falling back to its main title. */
+export function choreTitle(row: TitledRow, lang: Lang): string {
+  return row[`title_${lang}`]?.trim() || row.title;
+}
 
 export type Comment = { id: number; person: string; author: string; body: string; at: string };
 
 export type BoardChore = {
   id: number;
+  /** Name shown to this viewer (translated when a translation exists). */
   title: string;
+  /** Main title plus optional translations, for the admin's edit form. */
+  titles: { main: string; en: string; fr: string; es: string };
   notes: string;
   active: boolean;
   /** When each person checked it off this week (null = not yet). */
@@ -20,11 +31,11 @@ export type BoardChore = {
   comments: Comment[];
 };
 
-export async function loadBoard(week: string) {
+export async function loadBoard(week: string, lang: Lang = DEFAULT_LANG) {
   const sql = await db();
   const [chores, thisWeek, lasts, comments, people] = await Promise.all([
-    sql<{ id: number; title: string; notes: string; active: boolean }[]>`
-      select id, title, notes, active from chores order by position, id`,
+    sql<({ id: number; notes: string; active: boolean } & TitledRow)[]>`
+      select id, title, title_en, title_fr, title_es, notes, active from chores order by position, id`,
     sql<{ chore_id: number; person: string; done_at: Date }[]>`
       select chore_id, person, done_at from completions where week = ${week}`,
     sql<{ chore_id: number; person: string; done_at: Date }[]>`
@@ -48,7 +59,8 @@ export async function loadBoard(week: string) {
     }
     return {
       id: c.id,
-      title: c.title,
+      title: choreTitle(c, lang),
+      titles: { main: c.title, en: c.title_en, fr: c.title_fr, es: c.title_es },
       notes: c.notes,
       active: c.active,
       done,
@@ -73,12 +85,12 @@ export type PersonReport = {
 export type WeekReport = { week: string; total: number; people: PersonReport[] };
 
 /** Who did what (and what they missed) for each of the given weeks. */
-export async function loadReports(weeks: string[]): Promise<WeekReport[]> {
+export async function loadReports(weeks: string[], lang: Lang = DEFAULT_LANG): Promise<WeekReport[]> {
   if (weeks.length === 0) return [];
   const sql = await db();
   const [chores, completions] = await Promise.all([
-    sql<{ id: number; title: string; active: boolean; created_at: Date }[]>`
-      select id, title, active, created_at from chores order by position, id`,
+    sql<({ id: number; active: boolean; created_at: Date } & TitledRow)[]>`
+      select id, title, title_en, title_fr, title_es, active, created_at from chores order by position, id`,
     sql<{ chore_id: number; person: string; week: string; done_at: Date }[]>`
       select chore_id, person, week, done_at from completions where week in ${sql(weeks)}`,
   ]);
@@ -98,10 +110,10 @@ export async function loadReports(weeks: string[]): Promise<WeekReport[]> {
           person: p.id,
           done: counted.flatMap((c) => {
             const hit = mine.find((x) => x.chore_id === c.id);
-            return hit ? [{ title: c.title, at: hit.done_at.toISOString() }] : [];
+            return hit ? [{ title: choreTitle(c, lang), at: hit.done_at.toISOString() }] : [];
           }),
-          missed: counted.filter((c) => !mine.some((x) => x.chore_id === c.id)).map((c) => c.title),
-          items: counted.map((c) => ({ title: c.title, done: mine.some((x) => x.chore_id === c.id) })),
+          missed: counted.filter((c) => !mine.some((x) => x.chore_id === c.id)).map((c) => choreTitle(c, lang)),
+          items: counted.map((c) => ({ title: choreTitle(c, lang), done: mine.some((x) => x.chore_id === c.id) })),
         };
       }),
     };

@@ -1,0 +1,14 @@
+{{appName}} — {{t.weeklyReport}}
+{{weekLabel}}
+{{totals.summary}}
+{{#each people}}
+
+{{name}}: {{done}}/{{total}}
+{{#if doneChores.length}}{{@root.t.doneTitle}}:
+{{#each doneChores}}  [x] {{this}}
+{{/each}}{{/if}}{{#if missedChores.length}}{{@root.t.todoTitle}}:
+{{#each missedChores}}  [ ] {{this}}
+{{/each}}{{/if}}{{/each}}
+
+{{t.open}}: {{appUrl}}
+{{t.wipe}}

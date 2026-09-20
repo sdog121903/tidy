@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Vendored design kit (CommonJS, not ours to restyle).
+    "report-kit/**",
   ]),
 ]);
 

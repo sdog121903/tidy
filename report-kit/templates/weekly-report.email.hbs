@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="{{lang}}" xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="x-apple-disable-message-reformatting">
+<meta name="format-detection" content="telephone=no, address=no, email=no, date=no, url=no">
+<meta name="color-scheme" content="light">
+<meta name="supported-color-schemes" content="light">
+<title>{{appName}} — {{t.weeklyReport}} {{weekLabel}}</title>
+<!--[if mso]><noscript><xml><o:OfficeDocumentSettings><o:PixelsPerInch>96</o:PixelsPerInch></o:OfficeDocumentSettings></xml></noscript><![endif]-->
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+  body, table, td, a { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+  table, td { mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
+  img { border: 0; outline: none; text-decoration: none; }
+  a { text-decoration: none; }
+  @media only screen and (max-width: 620px) {
+    .outer  { padding: 20px 12px !important; }
+    .px     { padding-left: 20px !important; padding-right: 20px !important; }
+    .hero-t { font-size: 34px !important; line-height: 36px !important; }
+    .moon   { width: 84px !important; height: 84px !important; }
+    .moon-n { font-size: 24px !important; }
+    .name   { font-size: 24px !important; }
+  }
+</style>
+</head>
+<body style="margin:0; padding:0; background-color:#FCF535; color:#0B0B08; font-family:'Bricolage Grotesque','Helvetica Neue',Helvetica,Arial,sans-serif;">
+
+<!-- Preheader: the grey preview line in the inbox list. Keep it hidden. -->
+<div style="display:none; max-height:0; max-width:0; overflow:hidden; opacity:0; mso-hide:all; font-size:1px; line-height:1px; color:#FCF535;">
+  {{preheader}}&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;
+</div>
+
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#FCF535" style="background-color:#FCF535;">
+<tr><td align="center" class="outer" style="padding:32px 16px 40px;">
+
+  <table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" style="width:100%; max-width:600px;">
+
+    <!-- Header: wordmark + label -->
+    <tr><td style="padding:0 4px 20px;">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
+        <td align="left" style="font-family:'Bricolage Grotesque','Helvetica Neue',Helvetica,Arial,sans-serif; font-size:34px; line-height:34px; font-weight:800; letter-spacing:-0.05em; color:#0B0B08;">{{appName}}</td>
+        <td align="right" style="font-family:'Bricolage Grotesque','Helvetica Neue',Helvetica,Arial,sans-serif; font-size:14px; line-height:20px; font-weight:600; color:#0B0B08;">
+          <span style="display:inline-block; padding:7px 16px; border:2px solid #0B0B08; border-radius:999px;">{{t.weeklyReport}}</span>
+        </td>
+      </tr></table>
+    </td></tr>
+
+    <!-- Hero: black card, week + total -->
+    <tr><td>
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#0B0B08" style="background-color:#0B0B08; border-radius:28px;">
+        <tr><td class="px" style="padding:32px 32px 32px;">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
+            <td valign="middle" style="font-family:'Bricolage Grotesque','Helvetica Neue',Helvetica,Arial,sans-serif;">
+              <div style="font-size:13px; line-height:18px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:#D8D22C;">{{t.weeklyReport}}</div>
+              <div class="hero-t" style="margin-top:8px; font-size:42px; line-height:44px; font-weight:800; letter-spacing:-0.05em; color:#FCF535;">{{weekLabel}}</div>
+              <div style="margin-top:14px; font-size:16px; line-height:22px; font-weight:500; color:#FCF535;">{{totals.summary}}</div>
+            </td>
+            <td valign="middle" align="right" width="112" style="width:112px;">
+              <table role="presentation" class="moon" width="104" height="104" cellpadding="0" cellspacing="0" border="0" bgcolor="#FCF535" style="width:104px; height:104px; background-color:#FCF535; border-radius:52px;">
+                <tr><td align="center" valign="middle" style="font-family:'Bricolage Grotesque','Helvetica Neue',Helvetica,Arial,sans-serif; color:#0B0B08;">
+                  <div class="moon-n" style="font-size:30px; line-height:30px; font-weight:800; letter-spacing:-0.05em;">{{totals.done}}/{{totals.total}}</div>
+                  <div style="margin-top:2px; font-size:13px; line-height:16px; font-weight:600; color:#55530F;">{{t.doneWord}}</div>
+                </td></tr>
+              </table>
+            </td>
+          </tr></table>
+        </td></tr>
+      </table>
+    </td></tr>
+
+    <!-- One card per person -->
+    {{#each people}}
+    <tr><td style="padding-top:16px;">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border:2px solid #0B0B08; border-radius:24px;">
+        <tr><td class="px" style="padding:22px 28px 24px; font-family:'Bricolage Grotesque','Helvetica Neue',Helvetica,Arial,sans-serif;">
+
+          <!-- name + count pill -->
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
+            <td valign="middle" class="name" style="font-size:28px; line-height:32px; font-weight:800; letter-spacing:-0.05em; color:#0B0B08;">{{name}}</td>
+            <td valign="middle" align="right" width="90" style="width:90px;">
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0" bgcolor="#0B0B08" style="background-color:#0B0B08; border-radius:999px;">
+                <tr><td style="padding:6px 16px; font-size:16px; line-height:22px; font-weight:700; color:#FCF535; white-space:nowrap;">{{done}}/{{total}}</td></tr>
+              </table>
+            </td>
+          </tr></table>
+
+          <!-- progress bar: two cells, widths come from the view model -->
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:16px; border-radius:999px; overflow:hidden;">
+            <tr>
+              {{#if pct}}<td width="{{pct}}%" height="10" bgcolor="#0B0B08" style="width:{{pct}}%; height:10px; line-height:10px; font-size:0; background-color:#0B0B08;">&nbsp;</td>{{/if}}
+              {{#if restPct}}<td width="{{restPct}}%" height="10" bgcolor="#D9D42E" style="width:{{restPct}}%; height:10px; line-height:10px; font-size:0; background-color:#D9D42E;">&nbsp;</td>{{/if}}
+            </tr>
+          </table>
+
+          {{#if allDone}}
+          <!-- everything done -->
+          <div style="margin-top:18px; font-size:17px; line-height:24px; font-weight:700; color:#0B0B08;">&#10003;&nbsp; {{@root.t.allDone}}</div>
+          {{/if}}
+
+          <!-- DONE -->
+          <div style="margin-top:20px; font-size:12px; line-height:16px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:#55530F;">{{@root.t.doneTitle}} &middot; {{done}}</div>
+          {{#if doneChores.length}}
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:6px;">
+            {{#each doneChores}}
+            <tr>
+              <td width="28" valign="top" style="width:28px; font-size:16px; line-height:26px; font-weight:800; color:#0B0B08;">&#10003;</td>
+              <td valign="top" style="font-size:16px; line-height:26px; font-weight:500; color:#55530F;">{{this}}</td>
+            </tr>
+            {{/each}}
+          </table>
+          {{else}}
+          <div style="margin-top:6px; font-size:16px; line-height:24px; font-weight:500; color:#55530F;">{{@root.t.nothingDone}}</div>
+          {{/if}}
+
+          <!-- STILL TO DO: black panel, yellow rings -->
+          {{#if missedChores.length}}
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#0B0B08" style="margin-top:20px; background-color:#0B0B08; border-radius:18px;">
+            <tr><td style="padding:16px 20px 14px;">
+              <div style="font-size:12px; line-height:16px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:#D8D22C;">{{@root.t.todoTitle}} &middot; {{missedChores.length}}</div>
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:6px;">
+                {{#each missedChores}}
+                <tr>
+                  <td width="28" valign="top" style="width:28px; font-size:16px; line-height:26px; font-weight:700; color:#FCF535;">&#9675;</td>
+                  <td valign="top" style="font-size:16px; line-height:26px; font-weight:500; color:#FCF535;">{{this}}</td>
+                </tr>
+                {{/each}}
+              </table>
+            </td></tr>
+          </table>
+          {{/if}}
+
+        </td></tr>
+      </table>
+    </td></tr>
+    {{/each}}
+
+    <!-- Call to action: bulletproof button -->
+    <tr><td align="center" style="padding:28px 0 8px;">
+      <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+        <tr><td align="center" bgcolor="#0B0B08" style="background-color:#0B0B08; border-radius:999px;">
+          <!--[if mso]><v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" href="{{appUrl}}" style="height:54px; v-text-anchor:middle; width:220px;" arcsize="50%" stroke="f" fillcolor="#0B0B08"><w:anchorlock/><center style="color:#FCF535; font-family:Arial,sans-serif; font-size:17px; font-weight:bold;">{{t.open}}</center></v:roundrect><![endif]-->
+          <!--[if !mso]><!-->
+          <a href="{{appUrl}}" target="_blank" style="display:inline-block; padding:16px 40px; font-family:'Bricolage Grotesque','Helvetica Neue',Helvetica,Arial,sans-serif; font-size:17px; line-height:22px; font-weight:700; letter-spacing:-0.01em; color:#FCF535; text-decoration:none; border-radius:999px;">{{t.open}}</a>
+          <!--<![endif]-->
+        </td></tr>
+      </table>
+    </td></tr>
+
+    <!-- Footer -->
+    <tr><td align="center" style="padding:20px 12px 0; font-family:'Bricolage Grotesque','Helvetica Neue',Helvetica,Arial,sans-serif; font-size:13px; line-height:20px; font-weight:500; color:#55530F;">
+      {{t.wipe}}{{#if pdfAttached}} {{t.pdfNote}}{{/if}}<br>
+      <span style="font-size:18px; line-height:28px; font-weight:800; letter-spacing:-0.05em; color:#0B0B08;">{{appName}}</span>
+    </td></tr>
+
+  </table>
+
+</td></tr>
+</table>
+</body>
+</html>

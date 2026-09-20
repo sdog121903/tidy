@@ -1,19 +1,21 @@
 import Link from "next/link";
 import { toggleDone } from "@/app/actions";
 import type { BoardChore } from "@/lib/data";
+import { messages, type Lang } from "@/lib/i18n";
 import { CLEANERS, userName, type User } from "@/lib/users";
 import { RingCheck } from "./ring-check";
 import { When } from "./when";
 
 /** Chores as rows, people as columns, for the current week. */
-export function EveryoneTable({ chores, me }: { chores: BoardChore[]; me: User }) {
+export function EveryoneTable({ chores, me, lang }: { chores: BoardChore[]; me: User; lang: Lang }) {
+  const t = messages(lang);
   const isAdmin = me.id === "admin";
-  if (chores.length === 0) return <p className="t-empty">No chores yet.</p>;
+  if (chores.length === 0) return <p className="t-empty">{t.noChoresYet}</p>;
 
   return (
-    <section aria-label="Everyone" className="t-ev">
+    <section aria-label={t.tabEveryone} className="t-ev">
       <div className="t-ev-row t-ev-head">
-        <span className="t-ev-label">Chore</span>
+        <span className="t-ev-label">{t.chore}</span>
         {CLEANERS.map((p) => {
           const label = (
             <>
@@ -41,7 +43,7 @@ export function EveryoneTable({ chores, me }: { chores: BoardChore[]; me: User }
             <b>{c.title}</b>
             {c.last && (
               <span className="t-caption">
-                Last cleaned · {userName(c.last.by)} · <When iso={c.last.at} />
+                {t.lastCleaned} · {userName(c.last.by)} · <When iso={c.last.at} lang={lang} />
               </span>
             )}
           </div>
@@ -58,7 +60,7 @@ export function EveryoneTable({ chores, me }: { chores: BoardChore[]; me: User }
                     <RingCheck on={on} label={label} />
                   </form>
                 ) : (
-                  <RingCheck on={on} label={label} interactive={false} />
+                  <RingCheck on={on} label={label} interactive={false} stateText={[t.isDone, t.isNotDone]} />
                 )}
               </div>
             );

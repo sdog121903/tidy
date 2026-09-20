@@ -6,25 +6,28 @@ import { ManageView } from "@/components/manage-view";
 import { NameForm } from "@/components/name-form";
 import { NavMenu } from "@/components/nav-menu";
 import { ReportsView } from "@/components/reports-view";
+import { SettingsView } from "@/components/settings-view";
 import { Footer, Shell } from "@/components/shell";
 import { TidyChecklist } from "@/components/tidy-checklist";
 import { When } from "@/components/when";
-import { getCurrentUser } from "@/lib/current-user";
+import { getCurrentUser, getLang } from "@/lib/current-user";
 import { loadBoard, loadReports, recentWeeks } from "@/lib/data";
+import { messages } from "@/lib/i18n";
 import { CLEANERS, findCleaner } from "@/lib/users";
 import { weekOf } from "@/lib/week";
 
 export default async function Home({ searchParams }: PageProps<"/">) {
-  const me = await getCurrentUser();
+  const [me, lang] = await Promise.all([getCurrentUser(), getLang()]);
+  const t = messages(lang);
 
   if (!me) {
     return (
       <main className="t-login">
         <div className="t-login-circle">
           <h1 className="t-login-title">tidy</h1>
-          <p className="t-login-sub">Our weekly chore checklist</p>
+          <p className="t-login-sub">{t.tagline}</p>
         </div>
-        <NameForm />
+        <NameForm lang={lang} />
       </main>
     );
   }
@@ -32,22 +35,24 @@ export default async function Home({ searchParams }: PageProps<"/">) {
   const isAdmin = me.id === "admin";
   const tabs = isAdmin
     ? [
-        { id: "everyone", label: "Everyone" },
+        { id: "everyone", label: t.tabEveryone },
         ...CLEANERS.map((p) => ({ id: p.id, label: p.name })),
-        { id: "reports", label: "Reports" },
-        { id: "manage", label: "Manage" },
+        { id: "reports", label: t.tabReports },
+        { id: "manage", label: t.tabManage },
+        { id: "settings", label: t.tabSettings },
       ]
     : [
-        { id: me.id, label: "My chores" },
-        { id: "everyone", label: "Everyone" },
-        { id: "reports", label: "Reports" },
+        { id: me.id, label: t.tabMyChores },
+        { id: "everyone", label: t.tabEveryone },
+        { id: "reports", label: t.tabReports },
+        { id: "settings", label: t.tabSettings },
       ];
   const requested = (await searchParams).tab;
   const tab = tabs.find((t) => t.id === requested)?.id ?? tabs[0].id;
   const nav = tabs.map((t) => ({ href: `/?tab=${t.id}`, label: t.label, current: t.id === tab }));
 
   const week = weekOf();
-  const { chores, emails } = await loadBoard(week);
+  const { chores, emails } = await loadBoard(week, lang);
   const active = chores.filter((c) => c.active);
   const person = findCleaner(tab);
 
@@ -67,25 +72,26 @@ export default async function Home({ searchParams }: PageProps<"/">) {
               checked: !!doneAt,
               caption: doneAt ? (
                 <>
-                  Done · <When iso={doneAt} />
+                  {t.done} · <When iso={doneAt} lang={lang} />
                 </>
               ) : lastAt ? (
                 <>
-                  Last cleaned by {person.name} · <When iso={lastAt} />
+                  {t.lastCleanedBy(person.name)} · <When iso={lastAt} lang={lang} />
                 </>
               ) : (
-                "Not cleaned yet"
+                t.notCleanedYet
               ),
-              comments: <ChoreComments choreId={c.id} comments={comments} person={person} me={me} />,
+              comments: <ChoreComments choreId={c.id} comments={comments} person={person} me={me} lang={lang} />,
               commentCount: comments.length,
-              commentLabel: isAdmin ? `Comment to ${person.name}` : "Comments",
+              commentLabel: isAdmin ? t.commentTo(person.name) : t.comments,
             };
           })}
           onToggle={setChoreDone.bind(null, person.id)}
           autoCheckOnScroll={false}
-          menu={<NavMenu items={nav} />}
+          menu={<NavMenu items={nav} lang={lang} />}
+          lang={lang}
         />
-        <Footer />
+        <Footer lang={lang} />
       </>
     );
   }
@@ -93,10 +99,18 @@ export default async function Home({ searchParams }: PageProps<"/">) {
   return (
     <>
       <AutoRefresh />
-      <Shell me={me} week={week} nav={nav}>
-        {tab === "everyone" && <EveryoneTable chores={active} me={me} />}
-        {tab === "reports" && <ReportsView reports={await loadReports(await recentWeeks(8))} currentWeek={week} />}
-        {tab === "manage" && <ManageView chores={chores} emails={emails} />}
+      <Shell me={me} week={week} nav={nav} lang={lang}>
+        {tab === "everyone" && <EveryoneTable chores={active} me={me} lang={lang} />}
+        {tab === "reports" && (
+          <ReportsView
+            reports={await loadReports(await recentWeeks(8), lang)}
+            currentWeek={week}
+            lang={lang}
+            isAdmin={isAdmin}
+          />
+        )}
+        {tab === "manage" && <ManageView chores={chores} emails={emails} lang={lang} />}
+        {tab === "settings" && <SettingsView lang={lang} />}
       </Shell>
     </>
   );

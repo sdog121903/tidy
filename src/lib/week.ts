@@ -1,10 +1,11 @@
+import { DEFAULT_LANG, messages, type Lang } from "./i18n";
+
 /**
  * Weeks run Monday 00:00 → Sunday 23:59 in the house's timezone.
  * A week is identified by its Monday as "YYYY-MM-DD".
  */
 export const TIMEZONE = process.env.APP_TIMEZONE ?? "Europe/Madrid";
 
-const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
 /** Calendar date (y, m, d) of an instant, as seen in the house's timezone. */
 function localDate(at: Date) {
@@ -33,8 +34,9 @@ export function addWeeks(week: string, n: number): string {
   return iso(d);
 }
 
-/** "15 – 21 Sep 2026" */
-export function weekLabel(week: string): string {
+/** "15 – 21 Sep 2026" (month names in the given language) */
+export function weekLabel(week: string, lang: Lang = DEFAULT_LANG): string {
+  const MONTHS = messages(lang).months;
   const start = parse(week);
   const end = parse(week);
   end.setUTCDate(end.getUTCDate() + 6);

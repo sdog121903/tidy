@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
 import { leave } from "@/app/actions";
+import { messages, type Lang } from "@/lib/i18n";
 import { Icon } from "./icons";
 import { SubmitButton } from "./submit-button";
 
@@ -12,7 +13,8 @@ const subscribe = () => () => {};
 export type NavItem = { href: string; label: string; current: boolean };
 
 /** Menu button that opens a full-screen black panel sliding in from the left. */
-export function NavMenu({ items, className = "" }: { items: NavItem[]; className?: string }) {
+export function NavMenu({ items, lang, className = "" }: { items: NavItem[]; lang: Lang; className?: string }) {
+  const t = messages(lang);
   const [open, setOpen] = useState(false);
   const mounted = useSyncExternalStore(subscribe, () => true, () => false);
   const buttonRef = useRef<HTMLButtonElement>(null);
@@ -56,7 +58,7 @@ export function NavMenu({ items, className = "" }: { items: NavItem[]; className
         ref={buttonRef}
         type="button"
         className={`t-menu-btn ${className}`}
-        aria-label="Menu"
+        aria-label={t.menu}
         aria-expanded={open}
         aria-controls="t-nav-panel"
         onClick={() => setOpen(true)}
@@ -71,17 +73,17 @@ export function NavMenu({ items, className = "" }: { items: NavItem[]; className
             className="t-nav-panel t-on-ink"
             role="dialog"
             aria-modal="true"
-            aria-label="Menu"
+            aria-label={t.menu}
             data-open={open}
             inert={!open}
           >
             <div className="t-nav-top">
               <span className="t-wordmark">tidy</span>
-              <button type="button" className="t-menu-btn" aria-label="Close menu" onClick={close}>
+              <button type="button" className="t-menu-btn" aria-label={t.closeMenu} onClick={close}>
                 <Icon name="close" />
               </button>
             </div>
-            <nav aria-label="Sections">
+            <nav aria-label={t.sections}>
               <ul className="t-nav-links">
                 {items.map((it) => (
                   <li key={it.href}>
@@ -97,7 +99,7 @@ export function NavMenu({ items, className = "" }: { items: NavItem[]; className
               </ul>
             </nav>
             <form action={leave} className="t-nav-foot">
-              <SubmitButton className="t-pill t-pill--on-ink">Switch</SubmitButton>
+              <SubmitButton className="t-pill t-pill--on-ink">{t.switchUser}</SubmitButton>
             </form>
           </div>,
           document.body,

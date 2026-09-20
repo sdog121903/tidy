@@ -1,0 +1,41 @@
+tidy — Weekly report
+14 – 20 Sep 2026
+9 of 24 chores done this week
+
+Laura: 1/8
+Done:
+  [x] Hacer la cama
+Still to do:
+  [ ] Abrir las ventanas
+  [ ] Recoger la ropa
+  [ ] Lavar los platos
+  [ ] Barrer el suelo
+  [ ] Limpiar el baño
+  [ ] Poner la lavadora
+  [ ] Sacar la basura
+
+Anna: 0/8
+Still to do:
+  [ ] Abrir las ventanas
+  [ ] Hacer la cama
+  [ ] Recoger la ropa
+  [ ] Lavar los platos
+  [ ] Barrer el suelo
+  [ ] Limpiar el baño
+  [ ] Poner la lavadora
+  [ ] Sacar la basura
+
+Noemie: 8/8
+Done:
+  [x] Abrir las ventanas
+  [x] Hacer la cama
+  [x] Recoger la ropa
+  [x] Lavar los platos
+  [x] Barrer el suelo
+  [x] Limpiar el baño
+  [x] Poner la lavadora
+  [x] Sacar la basura
+
+
+Open tidy: http://localhost:3100
+Checkmarks wipe Sunday 23:59.

@@ -21,6 +21,10 @@ async function migrate(sql: Sql) {
     position integer not null default 0,
     created_at timestamptz not null default now()
   )`;
+  // Optional chore-name translations; blank means "use the main title".
+  for (const lang of ["en", "fr", "es"]) {
+    await sql.unsafe(`alter table chores add column if not exists title_${lang} text not null default ''`);
+  }
   // One row per chore, per person, per week. A new week simply has no rows yet,
   // which is how every checkmark gets wiped after Sunday 23:59.
   await sql`create table if not exists completions (

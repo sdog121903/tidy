@@ -1,5 +1,6 @@
 import { addComment, deleteComment } from "@/app/actions";
 import type { Comment } from "@/lib/data";
+import { messages, type Lang } from "@/lib/i18n";
 import { userName, type User } from "@/lib/users";
 import { SubmitButton } from "./submit-button";
 import { When } from "./when";
@@ -10,12 +11,15 @@ export function ChoreComments({
   comments,
   person,
   me,
+  lang,
 }: {
   choreId: number;
   comments: Comment[];
   person: User;
   me: User;
+  lang: Lang;
 }) {
+  const t = messages(lang);
   const isAdmin = me.id === "admin";
   const inputId = `comment-${choreId}-${person.id}`;
   return (
@@ -27,13 +31,13 @@ export function ChoreComments({
               <header>
                 <span>{userName(m.author)}</span>
                 <span className="t-when">
-                  <When iso={m.at} />
+                  <When iso={m.at} lang={lang} />
                 </span>
                 {(isAdmin || m.author === me.id) && (
                   <form action={deleteComment}>
                     <input type="hidden" name="commentId" value={m.id} />
-                    <SubmitButton className="t-link" aria-label={`Delete comment from ${userName(m.author)}`}>
-                      Delete
+                    <SubmitButton className="t-link" aria-label={t.deleteCommentFrom(userName(m.author))}>
+                      {t.deleteLabel}
                     </SubmitButton>
                   </form>
                 )}
@@ -47,17 +51,17 @@ export function ChoreComments({
         <input type="hidden" name="choreId" value={choreId} />
         <input type="hidden" name="person" value={person.id} />
         <label htmlFor={inputId} className="t-sr">
-          {isAdmin ? `Comment to ${person.name}` : "Write a message"}
+          {isAdmin ? t.commentTo(person.name) : t.writeMessage}
         </label>
         <input
           id={inputId}
           name="body"
           required
           maxLength={1000}
-          placeholder={isAdmin ? "e.g. Hey, you didn't do this one" : "Write a message…"}
+          placeholder={isAdmin ? t.adminCommentPlaceholder : t.writeMessagePlaceholder}
           className="t-input"
         />
-        <SubmitButton className="t-pill t-pill--ink">Send</SubmitButton>
+        <SubmitButton className="t-pill t-pill--ink">{t.send}</SubmitButton>
       </form>
     </div>
   );

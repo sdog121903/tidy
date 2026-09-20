@@ -1,0 +1,20 @@
+{
+  "locale": "en",
+  "weekStart": "2026-09-14",
+  "weekEnd": "2026-09-20",
+  "generatedAt": "2026-09-20T21:00:00+02:00",
+  "wipeAt": "2026-09-20T23:59:00+02:00",
+  "appUrl": "http://localhost:3100",
+  "pdfAttached": true,
+  "people": [
+    { "name": "Laura 🧡🥾",
+      "done":   ["Hacer la cama"],
+      "missed": ["Abrir las ventanas", "Recoger la ropa", "Lavar los platos", "Barrer el suelo", "Limpiar el baño", "Poner la lavadora", "Sacar la basura"] },
+    { "name": "Anna",
+      "done":   [],
+      "missed": ["Abrir las ventanas", "Hacer la cama", "Recoger la ropa", "Lavar los platos", "Barrer el suelo", "Limpiar el baño", "Poner la lavadora", "Sacar la basura"] },
+    { "name": "Noemie",
+      "done":   ["Abrir las ventanas", "Hacer la cama", "Recoger la ropa", "Lavar los platos", "Barrer el suelo", "Limpiar el baño", "Poner la lavadora", "Sacar la basura"],
+      "missed": [] }
+  ]
+}
