@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore, type CSSProperties } from "react";
 import { createPortal } from "react-dom";
 import { leave } from "@/app/actions";
 import { messages, type Lang } from "@/lib/i18n";
@@ -76,6 +76,7 @@ export function NavMenu({ items, lang, className = "" }: { items: NavItem[]; lan
             aria-label={t.menu}
             data-open={open}
             inert={!open}
+            style={{ "--t-nav-count": items.length } as CSSProperties}
           >
             <div className="t-nav-top">
               <span className="t-wordmark">tidy</span>

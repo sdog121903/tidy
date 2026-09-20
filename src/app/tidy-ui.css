@@ -1000,11 +1000,15 @@ span.t-ring-check {
 }
 .t-nav-panel > nav {
   margin: auto 0;
+  /* Let the links shrink inside the panel, and scroll as a last resort. */
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 .t-nav-links {
   list-style: none;
   margin: 0;
-  padding: 24px 0;
+  padding: clamp(8px, 2.5vh, 24px) 0;
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -1013,7 +1017,16 @@ span.t-ring-check {
   display: inline-block;
   padding: 4px 0;
   color: var(--t-accent);
-  font-size: clamp(44px, 14vw, 88px);
+  /*
+   * Sized by whichever runs out first: the panel's width, or its height shared
+   * between the links. --t-nav-count is the number of links (7 for the admin,
+   * 4 for everyone else); 240px is the wordmark row, the Switch pill and the
+   * paddings, and 12px is each link's own padding and gap.
+   */
+  font-size: max(
+    22px,
+    min(clamp(44px, 14vw, 88px), calc((100dvh - 240px) / var(--t-nav-count, 6) - 12px))
+  );
   font-weight: 800;
   letter-spacing: -0.05em;
   line-height: 1;
@@ -1036,6 +1049,8 @@ span.t-ring-check {
 .t-nav-panel[data-open="true"] .t-nav-links li:nth-child(4) a { transition-delay: 0.15s; }
 .t-nav-panel[data-open="true"] .t-nav-links li:nth-child(5) a { transition-delay: 0.2s; }
 .t-nav-panel[data-open="true"] .t-nav-links li:nth-child(6) a { transition-delay: 0.25s; }
+.t-nav-panel[data-open="true"] .t-nav-links li:nth-child(7) a { transition-delay: 0.3s; }
+.t-nav-panel[data-open="true"] .t-nav-links li:nth-child(n + 8) a { transition-delay: 0.35s; }
 .t-pill--on-ink {
   border-color: var(--t-accent);
   color: var(--t-accent);
