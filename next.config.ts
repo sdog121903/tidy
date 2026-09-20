@@ -9,6 +9,8 @@ const reportFiles = [
   "./node_modules/@fontsource-variable/bricolage-grotesque/**",
   // The slim Chromium that renders the PDF ships as brotli blobs, extracted at runtime.
   "./node_modules/@sparticuz/chromium/bin/**",
+  // playwright-core reads browsers.json (and other data files) from its own package at runtime.
+  "./node_modules/playwright-core/**",
 ];
 
 const nextConfig: NextConfig = {
